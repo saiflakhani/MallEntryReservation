@@ -11,8 +11,6 @@ class MallApp extends StatefulWidget {
 }
 
 class MallAppState extends State<MallApp> with TickerProviderStateMixin {
-  List<Widget>
-      previousCards; // The cards that show the previous bookings // TODO REMOVE THIS
 
   TabController _tabController; //Switch between spaces and bookings
   TabController _upcomingController; // Switch between past and present bookings
@@ -24,7 +22,7 @@ class MallAppState extends State<MallApp> with TickerProviderStateMixin {
     //futureAlbum = fetchAlbum();
     //The following functions are defined in bookings.dart
     // upcomingCards = fetchUpcomingBookings();
-    previousCards = fetchPreviousBookings();
+    //previousCards = fetchPreviousBookings();
 
     _tabController = new TabController(length: 2, vsync: this);
     _upcomingController = new TabController(length: 2, vsync: this);
@@ -42,7 +40,8 @@ class MallAppState extends State<MallApp> with TickerProviderStateMixin {
             child: Image(
           width: double.infinity,
           height: 200,
-          image: AssetImage('assets/lake.jpg'),
+          image: AssetImage('assets/slotbookingimage.png'),
+          fit: BoxFit.fill,
         )),
         TabBar(
           unselectedLabelColor: Colors.blueGrey,
@@ -113,62 +112,75 @@ class MallAppState extends State<MallApp> with TickerProviderStateMixin {
               //     // ))
               //   ],
               // )
-              new Container(
-                  color: Colors.black12,
-                  child: Column(children: <Widget>[
-                    Container(
-                      width: double.infinity,
-                      color: Colors.blueAccent,
-                      height: 20.0,
-                      child: Center(
-                        child: Text("Upcoming",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic)),
+              Expanded(
+                child: Container(
+                    color: Colors.black12,
+                    child: Column(children: <Widget>[
+                      Expanded(
+                          child: Row(
+                          children: <Widget>[
+                            RotatedBox(
+                                quarterTurns: -1,
+                                child: Container(
+                                  child: Text(
+                                    'Upcoming',
+                                    style: TextStyle(
+                                      color: Colors.blueAccent,
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  ),
+                                )),
+                            Expanded(
+                              child: Container(
+                                child: FutureBuilder(
+                                    future: fetchReservations(),
+                                    builder: (context, snapshot) {
+                                      //print(snapshot.data);
+                                      return (snapshot.data!=null && snapshot.data['upcomingReservations'] != null)
+                                          ? getListViewWidget(snapshot.data['upcomingReservations'])
+                                          : Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                    }),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        child: FutureBuilder(
-                            future: fetchReservations(),
-                            builder: (context, snapshot) {
-                              //print(snapshot.data);
-                              return snapshot.data != null
-                                  ? getListViewWidget(snapshot.data)
-                                  : Center(child: CircularProgressIndicator());
-                            }),
+                      Divider(color: Colors.blueAccent, height: 10.0, thickness: 10.0,),
+                      Expanded(
+                          child: Row(
+                          children: <Widget>[
+                            RotatedBox(
+                                quarterTurns: -1,
+                                child: Text(
+                                  'Previous',
+                                  style: TextStyle(
+                                    color: Colors.blueAccent,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                )),
+                            Expanded(
+                              child: Container(
+                                child: FutureBuilder(
+                                    future: fetchReservations(),
+                                    builder: (context, snapshot) {
+                                      //print(snapshot.data);
+                                      return (snapshot.data!=null && snapshot.data['pastReservations'] != null)
+                                          ? getListViewWidget(snapshot.data['pastReservations'])
+                                          : Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                    }),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      height: 20.0,
-                      color: Colors.blueAccent,
-                      child: Center(
-                        child: Text("Previous",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 15.0,
-                                fontWeight: FontWeight.bold,
-                                fontStyle: FontStyle.italic)),
-                      ),
-                    ),
-                    Expanded(
-                      flex: 5,
-                      child: Container(
-                        child: FutureBuilder(
-                            future: fetchReservations(),
-                            builder: (context, snapshot) {
-                              //print(snapshot.data);
-                              return snapshot.data != null
-                                  ? getListViewWidget(snapshot.data)
-                                  : Center(child: CircularProgressIndicator());
-                            }),
-                      ),
-                    ),
-                  ]))
+                    ])),
+              )
             ], controller: _tabController),
           ),
         )
@@ -186,7 +198,13 @@ class MallAppState extends State<MallApp> with TickerProviderStateMixin {
       return null;
   }
 
-  Widget getAppBar(){
-    return AppBar(title: Text('Mall Spot Reservation'));
+  Widget getAppBar() {
+    return AppBar(title: Text('Mall Spot Reservation', style: TextStyle(fontWeight: FontWeight.bold)),
+    backgroundColor: Colors.black,
+    actions: <Widget>[
+      IconButton(icon: Icon(Icons.refresh), onPressed: (){
+        fetchParkingGrid();
+      },)
+    ],);
   }
 }

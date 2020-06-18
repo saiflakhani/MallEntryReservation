@@ -23,7 +23,8 @@ Future<List<Slot>> fetchParkingGrid() async {
     // If the server did not return a 200 OK response,
     // then throw an exception.
     
-    throw Exception('Failed to load slots');
+    //throw Exception('Failed to load slots');
+    print("Slots failed to load");
   }
 }
 

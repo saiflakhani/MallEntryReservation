@@ -62,7 +62,7 @@ router.get("/get_week", function (req, res) {
         
         
 
-        var db_query = "SELECT timeslot FROM reservation WHERE reservation_date BETWEEN '" + begin + "' AND '" + end + "';";
+        var db_query = "SELECT * FROM reservation WHERE reservation_date BETWEEN '" + begin + "' AND '" + end + "';";
         //console.log(db_query);
         db_con.query(db_query, function (err, results) {
             midday = INITIAL_SLOTS, afternoon = INITIAL_SLOTS, evening = INITIAL_SLOTS, late_evening = INITIAL_SLOTS;
@@ -77,13 +77,13 @@ router.get("/get_week", function (req, res) {
             var daySlots = new Object();
             results.forEach(element => {
                 switch(element['timeslot']){
-                    case 'midday': midday = midday - 1;
+                    case 'midday': midday = midday - (parseInt(element['adults']) + parseInt(element['children']));
                     break;
-                    case 'afternoon': afternoon = afternoon - 1;
+                    case 'afternoon': afternoon = afternoon -  (parseInt(element['adults']) + parseInt(element['children']));
                     break;
-                    case 'evening': evening = evening - 1;
+                    case 'evening': evening = evening -  (parseInt(element['adults']) + parseInt(element['children']));
                     break;
-                    case 'late_evening': late_evening -= 1;
+                    case 'late_evening': late_evening = late_evening -  (parseInt(element['adults']) + parseInt(element['children']));
                     break;
                 }
             });

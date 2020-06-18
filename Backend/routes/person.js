@@ -260,7 +260,7 @@ router.post("/get_person_from_contact", function (req, res) {
         }
         
         if (elementReturn != undefined) {
-            return res.status(200).json(resultArray);
+            return res.status(200).json(elementReturn);
         } else {
             return res.status(500)
                 .json({
@@ -272,19 +272,6 @@ router.post("/get_person_from_contact", function (req, res) {
 
     })
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * @swagger

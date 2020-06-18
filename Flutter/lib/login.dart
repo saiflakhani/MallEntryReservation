@@ -9,10 +9,13 @@ import 'login_widgets/verticalText.dart';
 
 class LoginPage extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
+  static var phone = TextEditingController();
+  static var password = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,11 +36,34 @@ class _LoginPageState extends State<LoginPage> {
                 Row(children: <Widget>[
                   VerticalText(),
                   TextLogin(),
-                  SizedBox(width:20),
-                  Image(image: AssetImage('assets/logo.png'),height: 100, width: 100)
+                  SizedBox(width: 20),
+                  Image(
+                      image: AssetImage('assets/logo.png'),
+                      height: 100,
+                      width: 100)
                 ]),
                 InputEmail(),
-                PasswordInput(),
+                Padding(
+                  padding: const EdgeInsets.only(top: 20, left: 50, right: 50),
+                  child: Container(
+                    height: 20,
+                    width: MediaQuery.of(context).size.width,
+                    child: TextField(
+                      style: TextStyle(
+                        color: Colors.white,
+                      ),
+                      obscureText: true,
+                      controller: password,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        labelText: 'Password',
+                        labelStyle: TextStyle(
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 ButtonLogin(),
                 FirstTime(),
               ],
@@ -48,5 +74,3 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
-
-

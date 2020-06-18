@@ -74,6 +74,59 @@ router.get('/', function (req, res) {
 
 /**
  * @swagger
+ * /reservations/get_by_date:
+ *   get:
+ *     tags:
+ *       - Reservations
+ *     summary: Get all reservations based on the given date
+ *     description: Returns all reservation, with the persons that booked it
+ *     parameters:
+ *       - name: start_date
+ *         description: Start Date (YYYY-MM-dd)
+ *         in: query
+ *         required: true
+ *         type: string
+ *         schema:
+ *           $ref: '#/definitions/Reservation'
+ *       - name: end_date
+ *         description: End Date (YYYY-MM-dd)
+ *         in: query
+ *         required: true
+ *         type: string
+ *         schema:
+ *           $ref: '#/definitions/Reservation'
+ *     produces:
+ *       - application/json
+ *     responses:
+ *       200:
+ *         description: An array of reservations
+ *         schema:
+ *           $ref: '#/definitions/Reservation'
+ */
+// Home page route.
+router.get('/get_by_date', function (req, res) {
+  var start_date = req.query.start_date + " 00:00:00";
+  var end_date = req.query.end_date + " 23:59:59";
+  var query = "SELECT reservation.*, persons.*, reservation.id FROM reservation INNER JOIN persons ON reservation.person_id=persons.id AND reservation_date BETWEEN '"+start_date+"' AND '" + end_date + "' ORDER BY reservation.id ASC;"
+  console.log(query);
+  db_con.query(query, function (err, results) {
+    if (err) {
+      res.status(500)
+        .json({
+          status: 'failure',
+          message: 'There was an error getting this array',
+          error: err
+        });
+    }
+    //console.log("Results -->", results);
+    var resultArray = Object.values(JSON.parse(JSON.stringify(results)))
+    res.json(resultArray);
+  })
+});
+
+
+/**
+ * @swagger
  * /reservations/add:
  *   put:
  *     tags:

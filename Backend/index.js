@@ -5,9 +5,11 @@ var path = require('path');
 var reservation = require('./routes/reservation');
 var person = require('./routes/person');
 var slot = require('./routes/slots');
+var cors = require('cors');
 var swaggerJSDoc = require('swagger-jsdoc');
 var cookieParser = require('cookie-parser');
 var port = process.env.PORT || 3000;
+
 // ############ Define Swaggger API ####################
 var swaggerDefinition = {
   info: {
@@ -37,6 +39,7 @@ var options = {
 // initialize swagger-jsdoc
 var swaggerSpec = swaggerJSDoc(options);
 
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());

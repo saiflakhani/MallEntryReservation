@@ -114,18 +114,19 @@ class ReserveSlotState extends State<ReserveSlot> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Mall Spot Reservation'),
+        backgroundColor: Colors.black,
       ),
       backgroundColor: Colors.grey[24],
       //resizeToAvoidBottomInset: false,
       body: ListView(
         children: <Widget>[
           Container(
-              color: Colors.grey[24],
               child: Image(
-                width: double.infinity,
-                height: 200,
-                image: AssetImage('assets/lake.jpg'),
-              )),
+            width: double.infinity,
+            height: 200,
+            image: AssetImage('assets/slotbookingimage.png'),
+            fit: BoxFit.fill,
+          )),
           Container(
             width: double.infinity,
             height: 50.0,
