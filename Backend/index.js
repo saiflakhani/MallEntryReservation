@@ -51,7 +51,8 @@ app.use('/persons', person);
 app.use('/slots', slot);
 
 app.get('/', function (req, res) {
-  res.send('Hello World!');
+  // res.send('Hello World!');
+  res.redirect('/calendar');
 });
 
 // serve swagger
@@ -63,5 +64,5 @@ app.get('/swagger.json', function(req, res) {
 //serve the app
 
 app.listen(port, function () {
-  console.log('Example app listening on port 3000!');
+  console.log('Mall app listening on port: '+ port);
 });

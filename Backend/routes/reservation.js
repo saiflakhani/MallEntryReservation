@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+
 var db_con = require('../db/db_connection').connection;
 
 
@@ -36,6 +37,10 @@ var db_con = require('../db/db_connection').connection;
  *          type: number
  *       review_text:
  *          type: string
+ *       entry_time:
+ *          type: string
+ *       exit_time:
+ *          type: string
  *         
  */
 
@@ -59,7 +64,7 @@ var db_con = require('../db/db_connection').connection;
 router.get('/', function (req, res) {
   db_con.query("SELECT reservation.*, persons.*, reservation.id FROM reservation INNER JOIN persons ON reservation.person_id=persons.id ORDER BY reservation.id ASC", function (err, results) {
     if (err) {
-      res.status(500)
+      return res.status(500)
         .json({
           status: 'failure',
           message: 'There was an error getting this array'
@@ -67,7 +72,7 @@ router.get('/', function (req, res) {
     }
     //console.log("Results -->", results);
     var resultArray = Object.values(JSON.parse(JSON.stringify(results)))
-    res.json(resultArray);
+    return res.json(resultArray);
   })
 });
 
@@ -107,11 +112,11 @@ router.get('/', function (req, res) {
 router.get('/get_by_date', function (req, res) {
   var start_date = req.query.start_date + " 00:00:00";
   var end_date = req.query.end_date + " 23:59:59";
-  var query = "SELECT reservation.*, persons.*, reservation.id FROM reservation INNER JOIN persons ON reservation.person_id=persons.id AND reservation_date BETWEEN '"+start_date+"' AND '" + end_date + "' ORDER BY reservation.id ASC;"
+  var query = "SELECT reservation.*, persons.*, reservation.id FROM reservation INNER JOIN persons ON reservation.person_id=persons.id AND reservation_date BETWEEN '" + start_date + "' AND '" + end_date + "' ORDER BY reservation.id ASC;"
   console.log(query);
   db_con.query(query, function (err, results) {
     if (err) {
-      res.status(500)
+      return res.status(500)
         .json({
           status: 'failure',
           message: 'There was an error getting this array',
@@ -120,8 +125,8 @@ router.get('/get_by_date', function (req, res) {
     }
     //console.log("Results -->", results);
     var resultArray = Object.values(JSON.parse(JSON.stringify(results)))
-    res.json(resultArray);
-  })
+    return res.json(resultArray);
+  });
 });
 
 
@@ -151,28 +156,28 @@ router.put('/add', function (req, res) {
   if (req.body.reservation_key == null) {
     req.body.reservation_key = generateReservationKey();
   }
-  if(req.body.review == undefined){
+  if (req.body.review == undefined) {
     req.body.review = 0;
   }
   if (req.body.person_id == null) {
     return res.status(500).json({
-        status: 'failure',
-        message: 'person_id must be present'
-      });
+      status: 'failure',
+      message: 'person_id must be present'
+    });
   }
 
   if ((req.body.timeslot != "midday") && (req.body.timeslot != "afternoon") && (req.body.timeslot != "evening") && (req.body.timeslot != "late_evening")) {
     return res.status(500).json({
-        status: 'failure',
-        message: "Error, timeslot must be one of: midday, afternoon, evening or late_evening"
-      });
+      status: 'failure',
+      message: "Error, timeslot must be one of: midday, afternoon, evening or late_evening"
+    });
   }
 
-  
+
   db_con.query("INSERT INTO reservation(reservation_key, reservation_date, person_id, adults, children, adult_names, child_names, vehicle_type,\
       vehicle_number, timeslot, parking, review, review_text) VALUES (\
       '"+ req.body.reservation_key + "', '" + req.body.reservation_date + "', " + req.body.person_id + ", " + req.body.adults + ", \
-      "+ req.body.children + ", '" + req.body.adult_names + "', '"+req.body.child_names+"', '"+req.body.vehicle_type + "', '" + req.body.vehicle_number + "', '" + req.body.timeslot + "', '" + req.body.parking + "', \
+      "+ req.body.children + ", '" + req.body.adult_names + "', '" + req.body.child_names + "', '" + req.body.vehicle_type + "', '" + req.body.vehicle_number + "', '" + req.body.timeslot + "', '" + req.body.parking + "', \
       "+ req.body.review + ", '" + req.body.review_text + "');", function (err, results) {
 
     if (err) {
@@ -191,6 +196,86 @@ router.put('/add', function (req, res) {
       });
   });
 });
+
+/**
+ * @swagger
+ * /reservations/entry_exit:
+ *   post:
+ *     tags:
+ *       - Reservations
+ *     summary: Creates an entry or exit for the given reservation key
+ *     description: Creates an entry or exit for the given reservation key 
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: Reservation
+ *         description: Reservation object
+ *         in: body
+ *         required: true
+ *         schema:
+ *           $ref: '#/definitions/Reservation'
+ *     responses:
+ *       200:
+ *         description: Successfully entered or exited
+ */
+router.post('/entry_exit', function (req, res) {
+  if (req.body.reservation_key == undefined) {
+    return res.status(500).json({
+      status: 'failure',
+      message: 'Reservation Key not present'
+    });
+  }
+
+  var reservationKey = req.body.reservation_key;
+
+  var query = "SELECT entry_time, exit_time FROM reservation WHERE reservation_key = '" + reservationKey + "';";
+  db_con.query(query, function (err, results) {
+    if (err) {
+      return res.status(500)
+        .json({
+          status: 'failure',
+          message: 'There was an error getting this array',
+          error: err
+        });
+    }
+    //console.log("Results -->", results);
+    var resultArray = Object.values(JSON.parse(JSON.stringify(results)))
+    if (resultArray != undefined && resultArray[0] != undefined) {
+      var currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      
+      if (resultArray[0].entry_time == undefined) {
+        var columnToUpdate = "entry_time";
+      }else if(resultArray[0].exit_time == undefined){
+        var columnToUpdate = "exit_time";
+      }else{
+        return res.status(500).json({
+          status: 'failure',
+          message: 'This reservation is already used'
+        });
+      }
+      db_con.query("UPDATE reservation SET " + columnToUpdate +" = '" + currentDate + "' WHERE reservation_key = '" + reservationKey + "';", function (err, results) {
+        if (err) {
+          return res.status(500)
+            .json({
+              status: 'failure',
+              message: 'There was an error getting this array',
+              error: err
+            });
+        }
+        return res.status(200).json(
+          {
+            status: 'success',
+            message: 'Updated one element',
+            type: columnToUpdate
+          }
+        );
+      });
+    }
+  });
+
+});
+
+
 
 
 /**

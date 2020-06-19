@@ -29,6 +29,8 @@ dependencies:
   ticket_card: ^0.2.0
   qr_flutter: ^3.1.0
   shared_preferences: 0.5.7+3
+  flutter_blue: ^0.7.2
+  angles: ^1.2.1
 
 
   # The following adds the Cupertino Icons font to your application.
