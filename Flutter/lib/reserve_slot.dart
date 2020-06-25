@@ -33,6 +33,8 @@ class ReserveSlotState extends State<ReserveSlot> {
     new TextEditingController(),
     new TextEditingController()
   ];
+  final List<String> adultsGenderDropdownValues = ['Male', 'Male', 'Male', 'Male'];
+  final List<String> childrenGenderDropdownValues = ['Male', 'Male', 'Male', 'Male'];
   Reservation reservation;
 
   @override
@@ -64,8 +66,8 @@ class ReserveSlotState extends State<ReserveSlot> {
           person_id: storedPrefs['personId'],
           adults: int.parse(adultsDropdownValue),
           children: int.parse(childrenDropdownValue),
-          adult_names: addNames(adultNamesController),
-          child_names: addNames(childNamesContoller),
+          adult_names: addNames(adultNamesController, adultsGenderDropdownValues, int.parse(adultsDropdownValue)),
+          child_names: addNames(childNamesContoller, childrenGenderDropdownValues, int.parse(childrenDropdownValue)),
           reservation_key: null,
           reservation_date: reservation.reservation_date,
           vehicle_type: fourWheeler ? "Four Wheeler" : "Two Wheeler",
@@ -99,10 +101,11 @@ class ReserveSlotState extends State<ReserveSlot> {
   }
 
   //Utility function for adding names as a comma separated string
-  String addNames(List<TextEditingController> controllerArray) {
+  String addNames(List<TextEditingController> controllerArray, List<String> genderValue, int length) {
     String result = "";
-    for (TextEditingController controller in controllerArray) {
-      result += controller.text + ", ";
+    for (int index = 0; index < length; index++) {
+      result += controllerArray[index].text + " -> " + genderValue[index];
+      if(index != length-1) result += ", "; // don't add a comma after the last entry
     }
     return result;
   }
@@ -318,96 +321,175 @@ class ReserveSlotState extends State<ReserveSlot> {
                 SizedBox(
                   height: 10,
                 ),
-
                 //TODO ADD LISTVIEW HERE
-                Column(children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Expanded(
-                        child: Form(
-                          key: adultNamesFormKey,
-                          child: Container(
-                            height: double.parse(adultsDropdownValue) * 50.0,
-                            child: ListView.builder(
-                                itemCount: int.parse(adultsDropdownValue),
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext ctxt, int index) {
-                                  return Container(
-                                    padding:
-                                        EdgeInsets.only(left: 5.0, right: 5.0),
-                                    width: 50.0,
-                                    child: Center(
-                                      child: TextFormField(
-                                        validator: (value) {
-                                          if (value.isEmpty) {
-                                            return 'Please enter some text';
-                                          }
-                                          return null;
-                                        },
-                                        style: TextStyle(color: Colors.white),
-                                        textAlign: TextAlign.center,
-                                        controller: adultNamesController[index],
-                                        decoration: InputDecoration(
-                                            prefixIcon: Icon(Icons.person,
-                                                color: Colors.white),
-                                            // border: InputBorder.none,
-                                            // contentPadding: EdgeInsets.all(20.0),
-                                            hintText: 'Name of adult ' +
-                                                (index + 1).toString(),
-                                            hintStyle: TextStyle(
-                                              color: Colors.white,
-                                            )),
+                Form(
+                  key: adultNamesFormKey,
+                  child: Container(
+                    height: double.parse(adultsDropdownValue) * 50.0,
+                    child: ListView.builder(
+                        itemCount: int.parse(adultsDropdownValue),
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext ctxt, int index) {
+                          return Container(
+                            padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                            child: Row(children: <Widget>[
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Please enter some text';
+                                    }
+                                    return null;
+                                  },
+                                  style: TextStyle(color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                  controller: adultNamesController[index],
+                                  decoration: InputDecoration(
+                                      prefixIcon: Icon(Icons.person,
+                                          color: Colors.white),
+                                      // border: InputBorder.none,
+                                      // contentPadding: EdgeInsets.all(20.0),
+                                      hintText: 'Name of adult ' +
+                                          (index + 1).toString(),
+                                      hintStyle: TextStyle(
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10.0,
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: DropdownButton<String>(
+                                  value: adultsGenderDropdownValues[index],
+                                  dropdownColor: Colors.blueGrey,
+                                  icon: Icon(
+                                    Icons.arrow_downward,
+                                    color: Colors.white,
+                                  ),
+                                  iconSize: 24,
+                                  elevation: 16,
+                                  isExpanded: true,
+                                  style: TextStyle(color: Colors.white),
+                                  underline: Container(
+                                    height: 2,
+                                    color: Colors.white,
+                                  ),
+                                  onChanged: (String newValue) {
+                                    setState(() {
+                                      adultsGenderDropdownValues[index] = newValue;
+                                    });
+                                  },
+                                  items: <String>['Male', 'Female', 'Nonbinary']
+                                      .map<DropdownMenuItem<String>>(
+                                          (String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Center(
+                                        child: Text(
+                                          value,
+                                          style: TextStyle(
+                                              //fontSize: 10,
+                                              color: Colors.white),
+                                        ),
                                       ),
+                                    );
+                                  }).toList(),
+                                ),
+                              )
+                            ]),
+                          );
+                        }),
+                  ),
+                ),
+                Form(
+                  key: childNamesFormKey,
+                  child: Container(
+                    height: double.parse(childrenDropdownValue) * 50.0,
+                    child: ListView.builder(
+                        itemCount: int.parse(childrenDropdownValue),
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (BuildContext ctxt, int index) {
+                          return Container(
+                            padding: EdgeInsets.only(left: 5.0, right: 5.0),
+                            // width: 50.0,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  validator: (value) {
+                                    if (value.isEmpty) {
+                                      return 'Please enter some text';
+                                    }
+                                    return null;
+                                  },
+                                  style: TextStyle(color: Colors.white),
+                                  textAlign: TextAlign.center,
+                                  controller: childNamesContoller[index],
+                                  decoration: InputDecoration(
+                                      // border: InputBorder.none,
+                                      // contentPadding: EdgeInsets.all(20.0),
+                                      prefixIcon: Icon(Icons.child_care,
+                                          color: Colors.white),
+                                      hintText: 'Name of child ' +
+                                          (index + 1).toString(),
+                                      hintStyle: TextStyle(
+                                        color: Colors.white,
+                                      )),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 10.0,
+                              ),
+                              Expanded(
+                                flex: 1,
+                                child: DropdownButton<String>(
+                                    value: childrenGenderDropdownValues[index],
+                                    dropdownColor: Colors.blueGrey,
+                                    icon: Icon(
+                                      Icons.arrow_downward,
+                                      color: Colors.white,
                                     ),
-                                  );
-                                }),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Form(
-                          key: childNamesFormKey,
-                          child: Container(
-                            height: double.parse(childrenDropdownValue) * 50.0,
-                            child: ListView.builder(
-                                itemCount: int.parse(childrenDropdownValue),
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext ctxt, int index) {
-                                  return Container(
-                                    padding:
-                                        EdgeInsets.only(left: 5.0, right: 5.0),
-                                    width: 50.0,
-                                    child: Center(
-                                      child: TextFormField(
-                                        validator: (value) {
-                                          if (value.isEmpty) {
-                                            return 'Please enter some text';
-                                          }
-                                          return null;
-                                        },
-                                        style: TextStyle(color: Colors.white),
-                                        textAlign: TextAlign.left,
-                                        controller: childNamesContoller[index],
-                                        decoration: InputDecoration(
-                                            // border: InputBorder.none,
-                                            // contentPadding: EdgeInsets.all(20.0),
-                                            prefixIcon: Icon(Icons.child_care,
+                                    iconSize: 24,
+                                    elevation: 16,
+                                    isExpanded: true,
+                                    
+                                    style: TextStyle(color: Colors.white),
+                                    underline: Container(
+                                      height: 2,
+                                      color: Colors.white,
+                                    ),
+                                    onChanged: (String newValue) {
+                                      setState(() {
+                                        childrenGenderDropdownValues[index] = newValue;
+                                      });
+                                    },
+                                    items: <String>['Male', 'Female', 'Nonbinary']
+                                        .map<DropdownMenuItem<String>>(
+                                            (String value) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Center(
+                                          child: Text(
+                                            value,
+                                            style: TextStyle(
+                                                //fontSize: 10,
                                                 color: Colors.white),
-                                            hintText: 'Name of child ' +
-                                                (index + 1).toString(),
-                                            hintStyle: TextStyle(
-                                              color: Colors.white,
-                                            )),
-                                      ),
-                                    ),
-                                  );
-                                }),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
-                ]),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                              )
+                            ]),
+                          );
+                        }),
+                  ),
+                ),
                 SizedBox(
                   height: 10,
                 ),

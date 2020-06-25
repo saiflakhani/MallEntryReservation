@@ -91,6 +91,9 @@ class _ButtonNewUserState extends State<ButtonNewUser> {
       print("Status 401");
       Scaffold.of(context).showSnackBar(
           SnackBar(content: Text('User exists, but password incorrect')));
+    }else if(statusCode == 500){
+      Scaffold.of(context).showSnackBar(
+          SnackBar(content: Text('An error occured. Have you filled all fields?')));
     }
     Person gotPerson = Person.fromJson(json);
     print("Got person id --> " + gotPerson.id.toString());
