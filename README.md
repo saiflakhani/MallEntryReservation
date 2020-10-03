@@ -1,4 +1,4 @@
-# R-City Mall Entry App
+# Mall Entry Reservation
 
 A flutter project to reserve your spot before arrival, to facilitate easy entrance without huge waits for registration.
 
